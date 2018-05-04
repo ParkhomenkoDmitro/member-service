@@ -6,7 +6,9 @@
 package com.parkhomenko;
 
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,8 +32,13 @@ public class AdminController {
     @Autowired
     private AdminValidator adminValidator;
     
+    @Autowired
+    private Environment env;
+    
     @PostMapping("/logout")
-    public void logout(@RequestHeader(value=Constants.JWT_TOKEN_HEADER_NAME_KEY) String jwtToken) {
+    public void logout(HttpServletRequest req) {
+        String jwtTokenHeaderName = env.getProperty(Constants.JWT_TOKEN_HEADER_NAME_KEY); 
+        String jwtToken = req.getHeader(jwtTokenHeaderName);
         adminService.logout(jwtToken);
     }
     

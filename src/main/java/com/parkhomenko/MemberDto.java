@@ -19,6 +19,15 @@ public class MemberDto {
     public final LocalDate birthDate;
     public final byte[] image;
 
+    public MemberDto(String firstName, String lastName, String postalCode, LocalDate birthDate, byte[] image) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.postalCode = postalCode;
+        this.birthDate = birthDate;
+        this.image = image;
+        id = "";
+    }
+
     public MemberDto(String id, 
             String firstName, 
             String lastName, 

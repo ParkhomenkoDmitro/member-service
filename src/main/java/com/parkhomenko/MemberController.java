@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -69,9 +70,8 @@ public class MemberController {
         return ResponseEntity.ok(res);
     }
     
-    // url: /members/1,2,3,4
-    @DeleteMapping("/{ids}")
-    public void deleteMembersByIds(@PathVariable String[] ids) {
+    @DeleteMapping
+    public void deleteMembersByIds(@RequestParam(value = Constants.LIST_ID_KEY) List<String> ids) {
         memberService.delete(ids);
     }
 }

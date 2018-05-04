@@ -65,12 +65,12 @@ public class MemberService {
         }
     }
 
-    void delete(String[] ids) {
+    void delete(List<String> ids) {
         if(ids == null) {
             return;
         }
         
-        Stream.of(ids).forEach(id -> {
+        ids.stream().forEach(id -> {
             memberRepository.deleteById(id);
         });
     }
