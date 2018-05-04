@@ -1,19 +1,17 @@
 package com.parkhomenko;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import java.nio.charset.Charset;
 import java.util.Arrays;
-import javax.servlet.http.Cookie;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.core.env.Environment;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -48,7 +46,15 @@ public class MemberControllerTest {
     
     @Autowired
     private Environment env;
+    
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
+    @Before
+    public void setup() throws Exception {
+        mongoTemplate.dropCollection(Member.class);
+    }
+    
     @Test
     public void unauthorized_create_application_json_test() throws Exception {
         MemberDto member = new MemberDto("Dima", "Parkhomenko", null, null, null);
