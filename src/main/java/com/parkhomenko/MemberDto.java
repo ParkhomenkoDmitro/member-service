@@ -19,7 +19,14 @@ public class MemberDto {
     public final LocalDate birthDate;
     public final byte[] image;
 
-    public MemberDto(String firstName, String lastName, String postalCode, LocalDate birthDate, byte[] image) {
+    public MemberDto() {
+        id = firstName = lastName = postalCode = "";
+        birthDate = LocalDate.MIN;
+        image = new byte[0];
+    }
+
+    public MemberDto(String firstName, String lastName, String postalCode, 
+            LocalDate birthDate, byte[] image) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.postalCode = postalCode;

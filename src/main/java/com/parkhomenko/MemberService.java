@@ -50,7 +50,7 @@ public class MemberService {
     }
 
     void update(MemberDto memberDto) {
-        Optional<Member> optional = memberRepository.findById(memberDto.firstName);
+        Optional<Member> optional = memberRepository.findById(memberDto.id);
 
         if (optional.isPresent()) {
             Member member = optional.get();

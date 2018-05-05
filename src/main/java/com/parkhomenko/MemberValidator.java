@@ -15,31 +15,44 @@ import org.springframework.util.StringUtils;
  *
  * @author dmytro
  */
-
 @Component
 public class MemberValidator {
-    
-    public boolean isAllValid(MemberDto memberDto) {
-        boolean firstName = StringUtils.isEmpty(memberDto.firstName);
-        boolean lastName = StringUtils.isEmpty(memberDto.lastName);
-        boolean postalCode = StringUtils.isEmpty(memberDto.postalCode);
-        boolean birthDate =  memberDto.birthDate == null || memberDto.birthDate.isAfter(LocalDate.now());
-        
-        if((firstName && lastName && postalCode && birthDate) == false) {
+
+    /**
+     * Germany postal code validation used
+     *
+     * @param memberDto
+     * @return true if valid, false if invalid
+     */
+    public boolean isAllValidOnCreate(MemberDto memberDto) {
+        final boolean firstNameValid
+                = StringUtils.isEmpty(memberDto.firstName) == false;
+        final boolean lastNameValid
+                = StringUtils.isEmpty(memberDto.lastName) == false;
+        final boolean postalCodeValid
+                = StringUtils.isEmpty(memberDto.postalCode) == false;
+        final boolean birthDateValid = memberDto.birthDate != null
+                && (memberDto.birthDate.isAfter(LocalDate.MIN)
+                && memberDto.birthDate.isBefore(LocalDate.now()));
+
+        if ((firstNameValid && lastNameValid && postalCodeValid && birthDateValid) == false) {
             return false;
         }
-        
+
         Pattern compile = Pattern.compile("(^([0-9]{5})$)|(^([0-9]{6})$)");
         Matcher matcher = compile.matcher(memberDto.postalCode);
         boolean postalCodeValidation = matcher.find();
-        
-        if(postalCodeValidation == false) {
+
+        if (postalCodeValidation == false) {
             return false;
         }
-        
+
         //TODO
-        
         return true;
     }
     
+     public boolean isAllValidOnUpdate(MemberDto memberDto) {
+         return isAllValidOnCreate(memberDto) && StringUtils.isEmpty(memberDto.id) == false;
+     }
+
 }

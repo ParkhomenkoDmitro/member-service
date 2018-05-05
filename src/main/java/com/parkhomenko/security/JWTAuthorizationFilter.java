@@ -58,32 +58,33 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     }
     
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
-        String token = request.getHeader(HEADER_STRING);
-        if (token != null) {
+        final String notTrustToken = request.getHeader(HEADER_STRING);
+        
+        if (notTrustToken != null) {
             // parse the token.
-            String user = Jwts.parser()
+            final String login = Jwts.parser()
                     .setSigningKey(SECRET.getBytes())
-                    .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
+                    .parseClaimsJws(notTrustToken.replace(TOKEN_PREFIX, ""))
                     .getBody()
                     .getSubject();
 
-            if (user != null) {
-                AdminDto admin = adminDao.findByLogin(user);
+            if (login != null) {
+                AdminDto admin = adminDao.findByLogin(login);
                 
                 if(admin == null) {
                     return null;
                 } else {
-                    if(token.equals(admin.token) == false) {
+                    final String trustToken = JWTAuthenticationFilter.buildAuthHeaderValue(TOKEN_PREFIX, admin.token);
+                    
+                    if(notTrustToken.equals(trustToken) == false) {
                         return null;
                     }
                 }
                 
-                
-                return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+                return new UsernamePasswordAuthenticationToken(login, null, new ArrayList<>());
             }
             return null;
         }
         return null;
     }
-    
 }

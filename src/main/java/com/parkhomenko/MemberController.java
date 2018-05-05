@@ -47,7 +47,7 @@ public class MemberController {
     
     @PutMapping
     public ResponseEntity updateOneMemberById(@RequestBody MemberDto memberDto) {
-        if(memberValidator.isAllValid(memberDto) == false) {
+        if(memberValidator.isAllValidOnUpdate(memberDto) == false) {
             return ResponseEntity.badRequest().build();
         }
         
@@ -58,16 +58,12 @@ public class MemberController {
     
     @PostMapping
     public ResponseEntity<Map<String, String>> createOneMemeber(@RequestBody MemberDto memberDto) {
-        if(memberValidator.isAllValid(memberDto) == false) {
+        if(memberValidator.isAllValidOnCreate(memberDto) == false) {
             return ResponseEntity.badRequest().build();
         }
         
         final String memberId = memberService.create(memberDto);
-        HashMap<String, String> res = new HashMap<String, String>() {{
-            put(Constants.ENTITY_ID_KEY, memberId);
-        }};
-        
-        return ResponseEntity.ok(res);
+        return Utils.buildCreateResponse(memberId);
     }
     
     @DeleteMapping

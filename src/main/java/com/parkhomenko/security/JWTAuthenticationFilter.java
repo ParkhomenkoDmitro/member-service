@@ -81,6 +81,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         
         adminDao.setToken(login, token);
         
-        res.addHeader(HEADER_STRING, TOKEN_PREFIX + "\u0020" + token);
+        res.addHeader(HEADER_STRING, JWTAuthenticationFilter.buildAuthHeaderValue(TOKEN_PREFIX, token));
+    }
+    
+    public static String buildAuthHeaderValue(String tokenPrefix, String jwtToken) {
+        return tokenPrefix + "\u0020" + jwtToken;
     }
 }
