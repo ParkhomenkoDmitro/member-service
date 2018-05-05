@@ -15,6 +15,10 @@ public class AdminDto {
     public final String password;
     public final String token;
 
+    public AdminDto() {
+        id = login = password = token = "";
+    }
+    
     //For login
     public AdminDto(String login, String password) {
         this.login = login;

@@ -8,6 +8,7 @@ package com.parkhomenko.security;
 import com.parkhomenko.AdminDao;
 import com.parkhomenko.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
@@ -42,7 +43,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final AdminDao adminDao;
     
-    public WebSecurity(UserDetailsService userDetailsService, 
+    public WebSecurity(@Qualifier("AdminDetailsServiceImpl") UserDetailsService userDetailsService, 
             BCryptPasswordEncoder bCryptPasswordEncoder, 
             RestAuthenticationEntryPoint restAuthenticationEntryPoint, 
             AdminDao adminDao) {

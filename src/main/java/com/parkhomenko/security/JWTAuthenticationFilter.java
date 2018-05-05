@@ -81,6 +81,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         
         adminDao.setToken(login, token);
         
-        res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
+        res.addHeader(HEADER_STRING, TOKEN_PREFIX + "\u0020" + token);
     }
 }
