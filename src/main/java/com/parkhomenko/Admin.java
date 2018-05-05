@@ -6,6 +6,7 @@
 package com.parkhomenko;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 
 /**
  *
@@ -14,6 +15,8 @@ import org.springframework.data.annotation.Id;
 public class Admin {
     @Id
     public String id;
+    @Version 
+    public Long version;
     public String login;
     public String password;
     public String token;

@@ -8,6 +8,7 @@ package com.parkhomenko.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.parkhomenko.AdminDao;
 import com.parkhomenko.AdminDto;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.io.IOException;
@@ -74,6 +75,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         final String login = ((User) auth.getPrincipal()).getUsername();
         final String token = Jwts.builder()
+                .setId(String.valueOf(System.nanoTime()))
                 .setSubject(login)
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, SECRET.getBytes())

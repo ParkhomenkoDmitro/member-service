@@ -141,7 +141,7 @@ public class MemberControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().is(200)).andReturn();
 
-        final String jwtToken = mvcResult.getResponse().getHeader(env.getProperty(Constants.JWT_TOKEN_HEADER_NAME_KEY));
+        final String jwtToken = getTokenFromMvcResult(mvcResult);
 
         Assert.assertTrue("JWT token is NULL!", jwtToken != null);
         Assert.assertTrue("JWT token is empty!", StringUtils.isEmpty(jwtToken) == false);
@@ -165,14 +165,14 @@ public class MemberControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().is(200)).andReturn();
 
-        final String jwtTokenAfterFirstLogin = mvcResultAfterFirstLogin.getResponse().getHeader(env.getProperty(Constants.JWT_TOKEN_HEADER_NAME_KEY));
+        final String jwtTokenAfterFirstLogin = getTokenFromMvcResult(mvcResultAfterFirstLogin);
 
-        MvcResult mvcResultmvcResultAfterSecondtLogin = mockMvc.perform(post("/admins/login")
+        MvcResult mvcResultAfterSecondtLogin = mockMvc.perform(post("/admins/login")
                 .content(objectMapper.writeValueAsString(payload))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().is(200)).andReturn();
 
-        final String jwtTokenAfterSecondLogin = mvcResultmvcResultAfterSecondtLogin.getResponse().getHeader(env.getProperty(Constants.JWT_TOKEN_HEADER_NAME_KEY));
+        final String jwtTokenAfterSecondLogin = getTokenFromMvcResult(mvcResultAfterSecondtLogin);
 
         mockMvc.perform(get("/members/get-all-list")
                 .header(jwtTokenHeaderName, jwtTokenAfterFirstLogin)
@@ -225,7 +225,8 @@ public class MemberControllerTest {
 
         final MemberDto originUpdatedMemberDto = new MemberDto(fetchedMember.id,
                 "Nicolas", "Verba",
-                "54321", LocalDate.of(1994, 5, 2),
+                "54321",
+                LocalDate.of(1994, 5, 2),
                 fetchedMember.image);
 
         mockMvc.perform(put("/members")
@@ -278,21 +279,31 @@ public class MemberControllerTest {
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$", hasSize(3)))
-                
                 .andExpect(jsonPath("$[0].id", anyOf(is(entityIdOne), is(entityIdTwo), is(entityIdThree))))
                 .andExpect(jsonPath("$[0].firstName", is("Dima")))
                 .andExpect(jsonPath("$[0].lastName", is("Parkhomenko")))
                 .andExpect(jsonPath("$[0].postalCode", is("12345")))
-                
                 .andExpect(jsonPath("$[1].id", anyOf(is(entityIdOne), is(entityIdTwo), is(entityIdThree))))
                 .andExpect(jsonPath("$[1].firstName", is("Dima")))
                 .andExpect(jsonPath("$[1].lastName", is("Parkhomenko")))
                 .andExpect(jsonPath("$[1].postalCode", is("12345")))
-                
                 .andExpect(jsonPath("$[2].id", anyOf(is(entityIdOne), is(entityIdTwo), is(entityIdThree))))
                 .andExpect(jsonPath("$[2].firstName", is("Dima")))
                 .andExpect(jsonPath("$[2].lastName", is("Parkhomenko")))
                 .andExpect(jsonPath("$[2].postalCode", is("12345")));
+    }
+
+    @Test
+    public void admin_get_unreal_member_application_json_test() throws Exception {
+        final String jwtTokenHeaderName = getAuthHeaderName();
+        final String jwtToken = doAdminLoginUtil();
+        final String unrealEntityId = "-1";
+
+        mockMvc.perform(get("/members/" + unrealEntityId)
+                .header(jwtTokenHeaderName, jwtToken)
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(400));
     }
 
     private String doAdminLoginUtil() throws Exception {
@@ -308,7 +319,7 @@ public class MemberControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().is(200)).andReturn();
 
-        String jwtToken = mvcResultLogin.getResponse().getHeader(env.getProperty(Constants.JWT_TOKEN_HEADER_NAME_KEY));
+        String jwtToken = getTokenFromMvcResult(mvcResultLogin);
         return jwtToken;
     }
 
@@ -342,5 +353,9 @@ public class MemberControllerTest {
         Assert.assertEquals(originMember.birthDate, fetchedMember.birthDate);
         Assert.assertEquals(originMember.postalCode, fetchedMember.postalCode);
         Assert.assertArrayEquals(originMember.image, fetchedMember.image);
+    }
+    
+    private String getTokenFromMvcResult(MvcResult mvcResult) {
+        return mvcResult.getResponse().getHeader(getAuthHeaderName());
     }
 }

@@ -45,7 +45,7 @@ public class MemberService {
             return new MemberDto(member.id, member.firstName, member.lastName,
                     member.postalCode, member.birthDate, member.image);
         } else {
-            return null;
+            return new MemberDto();
         }
     }
 

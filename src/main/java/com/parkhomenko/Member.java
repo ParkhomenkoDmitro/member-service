@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 
 /**
  *
@@ -20,6 +21,8 @@ public class Member implements Serializable {
  
     @Id
     public String id;
+    @Version 
+    public Long version;
     public String firstName;
     public String lastName;
     public String postalCode;
