@@ -15,7 +15,7 @@ import org.junit.Test;
  *
  * @author dmytro
  */
-public class TokenTest {
+public class UnitJwtTest {
     
     @Test
     public void unique_token_generation_each_call_test() throws InterruptedException {

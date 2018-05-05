@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.parkhomenko;
+package com.parkhomenko.admin;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 

@@ -5,8 +5,8 @@
  */
 package com.parkhomenko.security;
 
-import com.parkhomenko.AdminDao;
-import com.parkhomenko.AdminDto;
+import com.parkhomenko.admin.AdminDao;
+import com.parkhomenko.admin.AdminDto;
 import static java.util.Collections.emptyList;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

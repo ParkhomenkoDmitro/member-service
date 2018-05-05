@@ -5,8 +5,8 @@
  */
 package com.parkhomenko.security;
 
-import com.parkhomenko.AdminDao;
-import com.parkhomenko.Constants;
+import com.parkhomenko.admin.AdminDao;
+import com.parkhomenko.common.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;

@@ -5,8 +5,8 @@
  */
 package com.parkhomenko.security;
 
-import com.parkhomenko.AdminDao;
-import com.parkhomenko.AdminDto;
+import com.parkhomenko.admin.AdminDao;
+import com.parkhomenko.admin.AdminDto;
 import io.jsonwebtoken.Jwts;
 import java.io.IOException;
 import java.util.ArrayList;

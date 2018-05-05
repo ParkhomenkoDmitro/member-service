@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.parkhomenko;
+package com.parkhomenko.member;
 
-import java.util.HashMap;
+import com.parkhomenko.common.Constants;
+import com.parkhomenko.common.Utils;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;

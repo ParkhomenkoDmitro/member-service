@@ -1,5 +1,9 @@
 package com.parkhomenko;
 
+import com.parkhomenko.common.Constants;
+import com.parkhomenko.member.MemberDto;
+import com.parkhomenko.member.Member;
+import com.parkhomenko.admin.Admin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -33,7 +37,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.test.web.servlet.result.JsonPathResultMatchers.*;
 import static org.hamcrest.Matchers.*;
 
 /*
@@ -48,7 +51,7 @@ import static org.hamcrest.Matchers.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class MemberControllerTest {
+public class IntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -247,19 +250,6 @@ public class MemberControllerTest {
         compareMembers(originUpdatedMemberDto, fetchedMemberAfterUpdate);
     }
 
-    private String doCreateMamberOnServerTest(String jwtTokenHeaderName,
-            String jwtToken,
-            MemberDto originMember) throws IOException, Exception {
-        MvcResult mvcResultPost = mockMvc.perform(post("/members")
-                .header(jwtTokenHeaderName, jwtToken)
-                .content(objectMapper.writeValueAsString(originMember))
-                .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andDo(print())
-                .andExpect(status().is(200)).andReturn();
-        String entityId = TestsUtil.getEntityId(mvcResultPost, objectMapper);
-        return entityId;
-    }
-
     @Test
     public void success_login_for_admin_with_get_all_members_application_json_test() throws Exception {
         final String jwtTokenHeaderName = getAuthHeaderName();
@@ -305,7 +295,7 @@ public class MemberControllerTest {
                 .andDo(print())
                 .andExpect(status().is(400));
     }
-
+    
     private String doAdminLoginUtil() throws Exception {
         final Map<String, String> payload = buildLoginData();
 
@@ -357,5 +347,18 @@ public class MemberControllerTest {
     
     private String getTokenFromMvcResult(MvcResult mvcResult) {
         return mvcResult.getResponse().getHeader(getAuthHeaderName());
+    }
+    
+    private String doCreateMamberOnServerTest(String jwtTokenHeaderName,
+            String jwtToken,
+            MemberDto originMember) throws IOException, Exception {
+        MvcResult mvcResultPost = mockMvc.perform(post("/members")
+                .header(jwtTokenHeaderName, jwtToken)
+                .content(objectMapper.writeValueAsString(originMember))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(200)).andReturn();
+        String entityId = TestsUtil.getEntityId(mvcResultPost, objectMapper);
+        return entityId;
     }
 }

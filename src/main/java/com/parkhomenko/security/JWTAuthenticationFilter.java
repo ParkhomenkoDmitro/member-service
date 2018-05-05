@@ -6,8 +6,8 @@
 package com.parkhomenko.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.parkhomenko.AdminDao;
-import com.parkhomenko.AdminDto;
+import com.parkhomenko.admin.AdminDao;
+import com.parkhomenko.admin.AdminDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
