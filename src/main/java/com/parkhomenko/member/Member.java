@@ -7,7 +7,9 @@ package com.parkhomenko.member;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import javax.xml.bind.annotation.XmlRootElement;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 
@@ -16,9 +18,10 @@ import org.springframework.data.annotation.Version;
  * @author dmytro
  */
 
-@XmlRootElement
+@ToString
+@NoArgsConstructor
+@EqualsAndHashCode
 public class Member implements Serializable {
- 
     @Id
     public String id;
     @Version 
@@ -28,9 +31,6 @@ public class Member implements Serializable {
     public String postalCode;
     public LocalDate birthDate;
     public byte[] image;
-
-    public Member() {
-    }
 
     public Member(String firstName, String lastName) {
         this.firstName = firstName;

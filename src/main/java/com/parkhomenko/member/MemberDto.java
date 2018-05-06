@@ -6,11 +6,16 @@
 package com.parkhomenko.member;
 
 import java.time.LocalDate;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  *
  * @author dmytro
  */
+
+@ToString
+@EqualsAndHashCode
 public class MemberDto {
     public final String id;
     public final String firstName;
