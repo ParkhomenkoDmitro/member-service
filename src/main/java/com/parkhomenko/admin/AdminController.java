@@ -1,6 +1,7 @@
 package com.parkhomenko.admin;
 
 import com.parkhomenko.common.Constants;
+import io.swagger.annotations.Api;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/admins")
+@Api(value="Member Server", produces = "application/json, application/xml")
 public class AdminController {
     
     @Autowired

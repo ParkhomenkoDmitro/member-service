@@ -15,11 +15,15 @@ import org.springframework.http.ResponseEntity;
  */
 public class Utils {
     
-    public static ResponseEntity<Map<String, String>> buildCreateResponse(String memberId) {
-        HashMap<String, String> res = new HashMap<String, String>() {{
-            put(Constants.ENTITY_ID_KEY, memberId);
-        }};
-        
-        return ResponseEntity.ok(res);
+    public static ResponseEntity<SuccessCreateDto> buildCreateResponse(String memberId) {
+        return ResponseEntity.ok(new SuccessCreateDto(memberId));
+    }
+    
+    public static class SuccessCreateDto {
+        public final String id;
+
+        public SuccessCreateDto(String id) {
+            this.id = id;
+        }
     }
 }
