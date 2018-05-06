@@ -17,7 +17,7 @@ public interface MemberDao {
 
     List<MemberDto> getAll();
 
-    MemberDto getOne(String id);
+    MemberDto getOneById(String id);
     
     void update(MemberDto memberDto);
 

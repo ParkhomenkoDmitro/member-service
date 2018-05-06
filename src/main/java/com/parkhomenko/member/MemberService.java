@@ -6,8 +6,6 @@
 package com.parkhomenko.member;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,57 +17,25 @@ import org.springframework.stereotype.Service;
 public class MemberService {
 
     @Autowired
-    private MemberRepository memberRepository;
+    private MemberDao memberDao;
 
     public String create(MemberDto memberDto) {
-        Member newMember = new Member(memberDto.firstName, memberDto.lastName,
-                memberDto.postalCode, memberDto.birthDate, memberDto.image);
-        Member savedMember = memberRepository.save(newMember);
-        return savedMember.id;
+        return memberDao.create(memberDto);
     }
 
     public List<MemberDto> getAll() {
-        return memberRepository.findAll().stream().map(item
-                -> new MemberDto(item.id, item.firstName, item.lastName,
-                        item.postalCode, item.birthDate, item.image))
-                .collect(Collectors.toList());
+        return memberDao.getAll();
     }
 
-    public MemberDto getOne(String id) {
-        Optional<Member> optional = memberRepository.findById(id);
-
-        if (optional.isPresent()) {
-            Member member = optional.get();
-            return new MemberDto(member.id, member.firstName, member.lastName,
-                    member.postalCode, member.birthDate, member.image);
-        } else {
-            return new MemberDto();
-        }
+    public MemberDto getOneById(String id) {
+        return memberDao.getOneById(id);
     }
 
     void update(MemberDto memberDto) {
-        Optional<Member> optional = memberRepository.findById(memberDto.id);
-
-        if (optional.isPresent()) {
-            Member member = optional.get();
-            
-            member.birthDate = memberDto.birthDate;
-            member.firstName = memberDto.firstName;
-            member.lastName = memberDto.lastName;
-            member.postalCode = memberDto.postalCode;
-            member.image = memberDto.image;
-            
-            memberRepository.save(member);
-        }
+        memberDao.update(memberDto);
     }
 
     void delete(List<String> ids) {
-        if(ids == null) {
-            return;
-        }
-        
-        ids.stream().forEach(id -> {
-            memberRepository.deleteById(id);
-        });
+        memberDao.delete(ids);
     }
 }

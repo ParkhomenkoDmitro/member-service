@@ -39,15 +39,14 @@ public class AdminController {
     
     @PostMapping("/sign-up")
     public ResponseEntity signUpByPassword(@RequestBody Map<String, String> loginData) {
-        final String newLogin = loginData.get(Constants.USERNAME_LOGIN_FORM_PARAMETER_KEY); 
-        
-        if(adminValidator.singUpCheck(newLogin) == false) {
+        if(adminValidator.singUpCheck(loginData) == false) {
             return ResponseEntity.badRequest().build();
         }
+
+        final String newLogin = loginData.get(Constants.USERNAME_LOGIN_FORM_PARAMETER_KEY);
+        final String pwd = loginData.get(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY);
         
-        adminService.signUpByPassword(new AdminDto(newLogin, 
-                loginData.get(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY)
-        ));
+        adminService.signUpByPassword(new AdminDto(newLogin, pwd));
         
         return ResponseEntity.ok().build();
     }

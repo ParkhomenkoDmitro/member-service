@@ -18,6 +18,12 @@ import org.springframework.util.StringUtils;
 @Component
 public class MemberValidator {
 
+    private final MemberDao memberDao;
+
+    public MemberValidator(MemberDao memberDao) {
+        this.memberDao = memberDao;
+    }
+    
     /**
      * Germany postal code validation used
      *
@@ -52,6 +58,12 @@ public class MemberValidator {
     }
     
      public boolean isAllValidOnUpdate(MemberDto memberDto) {
+        MemberDto foundMember = memberDao.getOneById(memberDto.id);
+        
+        if(StringUtils.isEmpty(foundMember.id)) {
+            return false;
+        }
+         
          return isAllValidOnCreate(memberDto) && StringUtils.isEmpty(memberDto.id) == false;
      }
 

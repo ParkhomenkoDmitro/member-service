@@ -43,7 +43,7 @@ public class MemberController {
 
     @GetMapping("/{id}")
     public ResponseEntity<MemberDto> getOneMemberById(@PathVariable String id) {
-        MemberDto foundMember = memberService.getOne(id);
+        MemberDto foundMember = memberService.getOneById(id);
 
         if (StringUtils.isEmpty(foundMember.id)) {
             return ResponseEntity.badRequest().build();

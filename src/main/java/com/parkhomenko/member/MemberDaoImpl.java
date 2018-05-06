@@ -9,16 +9,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author dmytro
  */
+
+@Service
 public class MemberDaoImpl implements MemberDao {
     
     @Autowired
     private MemberRepository memberRepository;
 
+    @Qualifier("emptyMember")
+    @Autowired
+    private MemberDto emptyMember;
+    
     @Override
     public String create(MemberDto memberDto) {
         Member newMember = new Member(memberDto.firstName, memberDto.lastName,
@@ -36,7 +44,7 @@ public class MemberDaoImpl implements MemberDao {
     }
 
     @Override
-    public MemberDto getOne(String id) {
+    public MemberDto getOneById(String id) {
         Optional<Member> optional = memberRepository.findById(id);
 
         if (optional.isPresent()) {
@@ -44,7 +52,7 @@ public class MemberDaoImpl implements MemberDao {
             return new MemberDto(member.id, member.firstName, member.lastName,
                     member.postalCode, member.birthDate, member.image);
         } else {
-            return new MemberDto();
+            return emptyMember;
         }
     }
 

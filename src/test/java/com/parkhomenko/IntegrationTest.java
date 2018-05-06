@@ -7,6 +7,7 @@ import com.parkhomenko.admin.Admin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 import static org.hamcrest.Matchers.*;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -126,6 +128,45 @@ public class IntegrationTest {
 
         mockMvc.perform(post("/admins/logout")
                 .header(jwtTokenHeaderName, "test jwt token")
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is(401));
+    }
+    
+    @Test
+    public void invalid_login_data_application_json_test() throws Exception {
+        HashMap<String, String> payloadEmptyValues = new HashMap<String, String>() {
+            {
+                put(Constants.USERNAME_LOGIN_FORM_PARAMETER_KEY, "");
+                put(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY, "");
+            }
+        };
+        
+        mockMvc.perform(post("/admins/login")
+                .content(objectMapper.writeValueAsString(payloadEmptyValues))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is(401));
+        
+        HashMap<String, String> payloadNullValus = new HashMap<String, String>() {
+            {
+                put(Constants.USERNAME_LOGIN_FORM_PARAMETER_KEY, null);
+                put(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY, null);
+            }
+        };
+        
+        mockMvc.perform(post("/admins/login")
+                .content(objectMapper.writeValueAsString(payloadNullValus))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is(401));
+        
+        HashMap<String, String> payloadInvalidValues = new HashMap<String, String>() {
+            {
+                put(Constants.USERNAME_LOGIN_FORM_PARAMETER_KEY, "Invalid login");
+                put(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY, "Invalid pwd");
+            }
+        };
+        
+        mockMvc.perform(post("/admins/login")
+                .content(objectMapper.writeValueAsString(payloadInvalidValues))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().is(401));
     }
@@ -296,6 +337,192 @@ public class IntegrationTest {
                 .andExpect(status().is(400));
     }
     
+    @Test
+    public void delete_members_application_json_test() throws Exception {
+        final String jwtTokenHeaderName = getAuthHeaderName();
+        final String jwtToken = doAdminLoginUtil();
+        final MemberDto originMemberOne = buildTestMember();
+        final MemberDto originMemberTwo = buildTestMember();
+        final MemberDto originMemberThree = buildTestMember();
+
+        final String entityIdOne = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMemberOne);
+        final String entityIdTwo = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMemberTwo);
+        final String entityIdThree = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMemberThree);
+        
+        mockMvc.perform(delete("/members")
+                .header(jwtTokenHeaderName, jwtToken)
+                .param(Constants.LIST_ID_KEY, entityIdOne, entityIdTwo, entityIdThree)
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(200));
+        
+        mockMvc.perform(get("/members/get-all-list")
+                .header(jwtTokenHeaderName, jwtToken)
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+    
+    @Test
+    public void double_sign_up_by_admin_application_json_test() throws Exception {
+        final Map<String, String> payload = buildLoginData();
+
+        mockMvc.perform(post("/admins/sign-up")
+                .content(objectMapper.writeValueAsString(payload))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is(200));
+        
+        mockMvc.perform(post("/admins/sign-up")
+                .content(objectMapper.writeValueAsString(payload))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is(400));
+    }
+    
+    @Test
+    public void update_member_with_invalid_data_application_json_test() throws Exception {
+        final String jwtTokenHeaderName = getAuthHeaderName();
+        final String jwtToken = doAdminLoginUtil();
+        
+        // invalid id test
+        final MemberDto memberWithInvalidId = new MemberDto("I am an invalid id", "Dima", 
+                "Parkhomenko", "12345", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
+        
+        mockMvc.perform(put("/members")
+                .header(jwtTokenHeaderName, jwtToken)
+                .content(objectMapper.writeValueAsString(memberWithInvalidId))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(400));
+        
+        final MemberDto originMember = buildTestMember();
+        final String entityId = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMember);
+        
+        memberServerValidation(entityId, jwtTokenHeaderName, jwtToken, put("/members"));
+    }
+    
+    @Test
+    public void create_member_with_invalid_data_application_json_test() throws Exception {
+        final String jwtTokenHeaderName = getAuthHeaderName();
+        final String jwtToken = doAdminLoginUtil();
+        
+        memberServerValidation(null, jwtTokenHeaderName, jwtToken, post("/members"));
+    }
+    
+    private void memberServerValidation(String entityId, 
+            String jwtTokenHeaderName, 
+            String jwtToken, MockHttpServletRequestBuilder putReqBuilder) throws Exception {
+        // invalid first name test: first name equals NULL
+        final MemberDto memberWithInvalidFirstNameNull = new MemberDto(entityId, null,
+                "Parkhomenko", "12345", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
+        
+        mockMvc.perform(putReqBuilder
+                .header(jwtTokenHeaderName, jwtToken)
+                .content(objectMapper.writeValueAsString(memberWithInvalidFirstNameNull))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(400));
+        
+        // invalid first name test: first name equals EMPTY STRING
+        final MemberDto memberWithInvalidFirstNameEmpty = new MemberDto(entityId, "", 
+                "Parkhomenko", "12345", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
+        
+        mockMvc.perform(putReqBuilder
+                .header(jwtTokenHeaderName, jwtToken)
+                .content(objectMapper.writeValueAsString(memberWithInvalidFirstNameEmpty))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(400));
+        
+        // invalid second name test: second name equals NULL
+        final MemberDto memberWithInvalidSecondNameNull = new MemberDto(entityId, "Dima", 
+                null, "12345", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
+        
+        mockMvc.perform(putReqBuilder
+                .header(jwtTokenHeaderName, jwtToken)
+                .content(objectMapper.writeValueAsString(memberWithInvalidSecondNameNull))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(400));
+        
+        // invalid second name test: second name equals EMPTY STRING
+        final MemberDto memberWithInvalidSecondNameEmpty = new MemberDto(entityId, "Dima", 
+                "", "12345", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
+        
+        mockMvc.perform(putReqBuilder
+                .header(jwtTokenHeaderName, jwtToken)
+                .content(objectMapper.writeValueAsString(memberWithInvalidSecondNameEmpty))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(400));
+        
+        // invalid ZIP test
+        final MemberDto memberWithInvalidZip = new MemberDto(entityId, "Dima", 
+                "Parkhomenko", "I am an invalid ZIP", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
+        
+        mockMvc.perform(putReqBuilder
+                .header(jwtTokenHeaderName, jwtToken)
+                .content(objectMapper.writeValueAsString(memberWithInvalidZip))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(400));
+        
+        // invalid ZIP test: ZIP equals NULL
+        final MemberDto memberWithZipNull = new MemberDto(entityId, "Dima", 
+                "Parkhomenko", null, LocalDate.of(1991, Month.SEPTEMBER, 24), null);
+        
+        mockMvc.perform(putReqBuilder
+                .header(jwtTokenHeaderName, jwtToken)
+                .content(objectMapper.writeValueAsString(memberWithZipNull))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(400));
+        
+        // invalid ZIP test: ZIP equals EMPTY STRING
+        final MemberDto memberWithZipEmpty = new MemberDto(entityId, "Dima", 
+                "Parkhomenko", "", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
+        
+        mockMvc.perform(putReqBuilder
+                .header(jwtTokenHeaderName, jwtToken)
+                .content(objectMapper.writeValueAsString(memberWithZipEmpty))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(400));
+        
+        // invalid birth day test: birth day equals NULL
+        final MemberDto memberWithBirthDayNull = new MemberDto(entityId, "Dima", 
+                "Parkhomenko", "123456", null, null);
+        
+        mockMvc.perform(putReqBuilder
+                .header(jwtTokenHeaderName, jwtToken)
+                .content(objectMapper.writeValueAsString(memberWithBirthDayNull))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(400));
+        
+        // invalid birth day test: birth day is after now date
+        final MemberDto memberWithBirthDayAfterNowDate = new MemberDto(entityId, "Dima", 
+                "Parkhomenko", "123456", LocalDate.now().plusDays(1), null);
+        
+        mockMvc.perform(putReqBuilder
+                .header(jwtTokenHeaderName, jwtToken)
+                .content(objectMapper.writeValueAsString(memberWithBirthDayAfterNowDate))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(400));
+        
+        // invalid birth day test: birth day is not after LocalDate.MIN from Java JDK 1.8
+        final MemberDto memberWithBirthDayNotAfterMinDate = new MemberDto(entityId, "Dima", 
+                "Parkhomenko", "123456", LocalDate.MIN, null);
+        
+        mockMvc.perform(putReqBuilder
+                .header(jwtTokenHeaderName, jwtToken)
+                .content(objectMapper.writeValueAsString(memberWithBirthDayNotAfterMinDate))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(400));
+    }
+    
     private String doAdminLoginUtil() throws Exception {
         final Map<String, String> payload = buildLoginData();
 
@@ -317,7 +544,7 @@ public class IntegrationTest {
         MemberDto originMember = new MemberDto("Dima",
                 "Parkhomenko",
                 "12345",
-                LocalDate.of(1991, 9, 24),
+                LocalDate.of(1991, Month.SEPTEMBER, 24),
                 null);
         return originMember;
     }
