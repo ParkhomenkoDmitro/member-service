@@ -59,7 +59,11 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
                 };
 
                 XmlMapper xmlMapper = new XmlMapper();
-                String xml = xmlMapper.writeValueAsString(payload);
+                String xml = xmlMapper
+                        .writer()
+                        .withRootName("root")
+                        .writeValueAsString(payload);
+
                 response.getWriter().write(xml);
 
                 return;

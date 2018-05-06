@@ -77,22 +77,26 @@ public class IntegrationTest {
     public void unauthorized_create_application_json_test() throws Exception {
         final MemberDto member = new MemberDto("Dima", "Parkhomenko", null, null, null);
 
-        mockMvc.perform(post("/members")
+        MvcResult mvcResult = mockMvc.perform(post("/members")
                 .content(objectMapper.writeValueAsString(member))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
-                .andExpect(status().is(401));
+                .andExpect(status().is(401)).andReturn();
+
+        Assert.assertEquals(mvcResult.getResponse().getContentAsString(), "{\"message\":\"Unauthorized request: invalid token\"}");
     }
 
     @Test
     public void unauthorized_create_application_xml_test() throws Exception {
         final MemberDto member = new MemberDto("Dima", "Parkhomenko", null, null, null);
 
-        mockMvc.perform(post("/members")
+        MvcResult mvcResult = mockMvc.perform(post("/members")
                 .content(objectMapper.writeValueAsString(member))
                 .contentType(MediaType.APPLICATION_XML))
                 .andDo(print())
-                .andExpect(status().is(401));
+                .andExpect(status().is(401)).andReturn();
+
+        Assert.assertEquals(mvcResult.getResponse().getContentAsString(), "<root><message>Unauthorized request: invalid token</message></root>");
     }
 
     @Test
@@ -199,13 +203,12 @@ public class IntegrationTest {
     }
 
     private HashMap<String, String> buildLoginData(final String login, final String pwd) {
-        HashMap<String, String> payloadEmptyValues = new HashMap<String, String>() {
+        return new HashMap<String, String>() {
             {
                 put(Constants.USERNAME_LOGIN_FORM_PARAMETER_KEY, login);
                 put(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY, pwd);
             }
         };
-        return payloadEmptyValues;
     }
 
     @Test
@@ -359,6 +362,35 @@ public class IntegrationTest {
                 .andExpect(jsonPath("$[2].firstName", is("Dima")))
                 .andExpect(jsonPath("$[2].lastName", is("Parkhomenko")))
                 .andExpect(jsonPath("$[2].postalCode", is("12345")));
+    }
+
+    @Test
+    public void success_login_for_admin_with_get_all_members_application_xml_test() throws Exception {
+        final String jwtTokenHeaderName = getAuthHeaderName();
+        final String jwtToken = doAdminLoginUtil();
+        final MemberDto originMemberOne = buildTestMember();
+        final MemberDto originMemberTwo = buildTestMember();
+        final MemberDto originMemberThree = buildTestMember();
+
+        final String entityIdOne = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMemberOne);
+        final String entityIdTwo = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMemberTwo);
+        final String entityIdThree = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMemberThree);
+
+        MvcResult mvcResult = mockMvc.perform(get("/members/get-all-list")
+                .header(jwtTokenHeaderName, jwtToken)
+                .accept(MediaType.APPLICATION_XML))
+                .andDo(print())
+                .andExpect(status().is(200)).andReturn();
+
+        String actual =
+                "<List>" +
+                    "<item><id>" + entityIdOne + "</id><firstName>Dima</firstName><lastName>Parkhomenko</lastName><postalCode>12345</postalCode><birthDate>1991-09-24</birthDate><image/></item>" +
+                    "<item><id>" + entityIdTwo + "</id><firstName>Dima</firstName><lastName>Parkhomenko</lastName><postalCode>12345</postalCode><birthDate>1991-09-24</birthDate><image/></item>" +
+                    "<item><id>" + entityIdThree + "</id><firstName>Dima</firstName><lastName>Parkhomenko</lastName><postalCode>12345</postalCode><birthDate>1991-09-24</birthDate><image/></item>" +
+                "</List>";
+        
+        Assert.assertEquals(mvcResult.getResponse().getContentAsString(), actual);
+
     }
 
     @Test

@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 /**
@@ -37,7 +38,7 @@ public class MemberDaoImpl implements MemberDao {
 
     @Override
     public List<MemberDto> getAll() {
-        return memberRepository.findAll().stream().map(item
+        return memberRepository.findAll(Sort.by(Sort.Direction.ASC, "id")).stream().map(item
                 -> new MemberDto(item.id, item.firstName, item.lastName,
                         item.postalCode, item.birthDate, item.image))
                 .collect(Collectors.toList());
