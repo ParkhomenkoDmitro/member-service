@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  *
@@ -30,6 +31,10 @@ public class AdminDetailsServiceImpl implements UserDetailsService {
     
     @Override
     public UserDetails loadUserByUsername(String adminLogin) throws UsernameNotFoundException {
+        if(StringUtils.isEmpty(adminLogin)) {
+            throw new UsernameNotFoundException(adminLogin);
+        }
+        
         AdminDto admin = adminDao.findByLogin(adminLogin);
         
         if(admin == null) {

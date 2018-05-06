@@ -19,6 +19,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -41,14 +42,17 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     private final UserDetailsService userDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+    private final AuthenticationFailureHandler authenticationFailureHandler;
     private final AdminDao adminDao;
     
     public WebSecurity(@Qualifier("AdminDetailsServiceImpl") UserDetailsService userDetailsService, 
-            BCryptPasswordEncoder bCryptPasswordEncoder, 
+            BCryptPasswordEncoder bCryptPasswordEncoder,
+            AuthenticationFailureHandler authenticationFailureHandler,
             RestAuthenticationEntryPoint restAuthenticationEntryPoint, 
             AdminDao adminDao) {
         this.userDetailsService = userDetailsService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.authenticationFailureHandler = authenticationFailureHandler;
         this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
         this.adminDao = adminDao;
     }
@@ -64,6 +68,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                         adminDao
                 );
         
+        jwtAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
         jwtAuthenticationFilter.setUsernameParameter(Constants.USERNAME_LOGIN_FORM_PARAMETER_KEY);
         jwtAuthenticationFilter
                 .setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(LOGIN_URL, "POST"));

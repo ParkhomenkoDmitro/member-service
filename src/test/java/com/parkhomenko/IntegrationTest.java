@@ -144,7 +144,7 @@ public class IntegrationTest {
         mockMvc.perform(post("/admins/login")
                 .content(objectMapper.writeValueAsString(payloadEmptyValues))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().is(401));
+                .andExpect(status().is(400));
         
         HashMap<String, String> payloadNullValus = new HashMap<String, String>() {
             {
@@ -156,7 +156,7 @@ public class IntegrationTest {
         mockMvc.perform(post("/admins/login")
                 .content(objectMapper.writeValueAsString(payloadNullValus))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().is(401));
+                .andExpect(status().is(400));
         
         HashMap<String, String> payloadInvalidValues = new HashMap<String, String>() {
             {
@@ -168,7 +168,7 @@ public class IntegrationTest {
         mockMvc.perform(post("/admins/login")
                 .content(objectMapper.writeValueAsString(payloadInvalidValues))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().is(401));
+                .andExpect(status().is(400));
     }
 
     @Test
