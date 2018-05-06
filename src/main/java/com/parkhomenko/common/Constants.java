@@ -15,9 +15,9 @@ public class Constants {
     public static final String JWT_TOKEN_HEADER_NAME_KEY = "security.header_name";
     public static final String JWT_TOKEN_PREFIX_KEY = "security.token_prefix";
     public static final String JWT_TOKEN_SECRET_KEY = "security.secret";
-    public static final String JWT_TOKEN_EXPIRATIO_TIME_KEY = "security.expiration_time";
     public static final String USERNAME_LOGIN_FORM_PARAMETER_KEY = "login";
     public static final String LIST_ID_KEY = "ids";
+    public static final String ERROR_MESSAGE_KEY = "message";
     
     private Constants() {
     }    

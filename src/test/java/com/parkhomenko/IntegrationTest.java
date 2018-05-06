@@ -51,7 +51,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
  * @author dmytro
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
 @AutoConfigureMockMvc
 public class IntegrationTest {
 
@@ -80,6 +80,18 @@ public class IntegrationTest {
         mockMvc.perform(post("/members")
                 .content(objectMapper.writeValueAsString(member))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(401));
+    }
+
+    @Test
+    public void unauthorized_create_application_xml_test() throws Exception {
+        final MemberDto member = new MemberDto("Dima", "Parkhomenko", null, null, null);
+
+        mockMvc.perform(post("/members")
+                .content(objectMapper.writeValueAsString(member))
+                .contentType(MediaType.APPLICATION_XML))
+                .andDo(print())
                 .andExpect(status().is(401));
     }
 
@@ -131,44 +143,69 @@ public class IntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().is(401));
     }
-    
+
+    @Test
+    public void invalid_sing_up_data_application_json_test() throws Exception {
+        HashMap<String, String> payloadEmptyValues = buildLoginData("", "");
+
+        mockMvc.perform(post("/admins/sign-up")
+                .content(objectMapper.writeValueAsString(payloadEmptyValues))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is(400));
+
+        HashMap<String, String> payloadNullValus = buildLoginData(null, null);
+
+        mockMvc.perform(post("/admins/sign-up")
+                .content(objectMapper.writeValueAsString(payloadNullValus))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is(400));
+
+        // sing up twise with the same login
+        final Map<String, String> payload = buildLoginData();
+
+        mockMvc.perform(post("/admins/sign-up")
+                .content(objectMapper.writeValueAsString(payload))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is(200));
+        
+        mockMvc.perform(post("/admins/sign-up")
+                .content(objectMapper.writeValueAsString(payload))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is(400));
+    }
+
     @Test
     public void invalid_login_data_application_json_test() throws Exception {
-        HashMap<String, String> payloadEmptyValues = new HashMap<String, String>() {
-            {
-                put(Constants.USERNAME_LOGIN_FORM_PARAMETER_KEY, "");
-                put(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY, "");
-            }
-        };
-        
+        HashMap<String, String> payloadEmptyValues = buildLoginData("", "");
+
         mockMvc.perform(post("/admins/login")
                 .content(objectMapper.writeValueAsString(payloadEmptyValues))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().is(400));
-        
-        HashMap<String, String> payloadNullValus = new HashMap<String, String>() {
-            {
-                put(Constants.USERNAME_LOGIN_FORM_PARAMETER_KEY, null);
-                put(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY, null);
-            }
-        };
-        
+
+        HashMap<String, String> payloadNullValus = buildLoginData(null, null);
+
         mockMvc.perform(post("/admins/login")
                 .content(objectMapper.writeValueAsString(payloadNullValus))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().is(400));
-        
-        HashMap<String, String> payloadInvalidValues = new HashMap<String, String>() {
-            {
-                put(Constants.USERNAME_LOGIN_FORM_PARAMETER_KEY, "Invalid login");
-                put(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY, "Invalid pwd");
-            }
-        };
-        
+
+        HashMap<String, String> payloadInvalidValues = buildLoginData("Invalid login", "Invalid pwd");
+
         mockMvc.perform(post("/admins/login")
                 .content(objectMapper.writeValueAsString(payloadInvalidValues))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().is(400));
+    }
+
+    private HashMap<String, String> buildLoginData(final String login, final String pwd) {
+        HashMap<String, String> payloadEmptyValues = new HashMap<String, String>() {
+            {
+                put(Constants.USERNAME_LOGIN_FORM_PARAMETER_KEY, login);
+                put(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY, pwd);
+            }
+        };
+        return payloadEmptyValues;
     }
 
     @Test
@@ -336,7 +373,7 @@ public class IntegrationTest {
                 .andDo(print())
                 .andExpect(status().is(400));
     }
-    
+
     @Test
     public void delete_members_application_json_test() throws Exception {
         final String jwtTokenHeaderName = getAuthHeaderName();
@@ -348,14 +385,14 @@ public class IntegrationTest {
         final String entityIdOne = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMemberOne);
         final String entityIdTwo = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMemberTwo);
         final String entityIdThree = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMemberThree);
-        
+
         mockMvc.perform(delete("/members")
                 .header(jwtTokenHeaderName, jwtToken)
                 .param(Constants.LIST_ID_KEY, entityIdOne, entityIdTwo, entityIdThree)
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(status().is(200));
-        
+
         mockMvc.perform(get("/members/get-all-list")
                 .header(jwtTokenHeaderName, jwtToken)
                 .accept(MediaType.APPLICATION_JSON_UTF8))
@@ -363,7 +400,7 @@ public class IntegrationTest {
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$", hasSize(0)));
     }
-    
+
     @Test
     public void double_sign_up_by_admin_application_json_test() throws Exception {
         final Map<String, String> payload = buildLoginData();
@@ -372,149 +409,149 @@ public class IntegrationTest {
                 .content(objectMapper.writeValueAsString(payload))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().is(200));
-        
+
         mockMvc.perform(post("/admins/sign-up")
                 .content(objectMapper.writeValueAsString(payload))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().is(400));
     }
-    
+
     @Test
     public void update_member_with_invalid_data_application_json_test() throws Exception {
         final String jwtTokenHeaderName = getAuthHeaderName();
         final String jwtToken = doAdminLoginUtil();
-        
+
         // invalid id test
-        final MemberDto memberWithInvalidId = new MemberDto("I am an invalid id", "Dima", 
+        final MemberDto memberWithInvalidId = new MemberDto("I am an invalid id", "Dima",
                 "Parkhomenko", "12345", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
-        
+
         mockMvc.perform(put("/members")
                 .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithInvalidId))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(status().is(400));
-        
+
         final MemberDto originMember = buildTestMember();
         final String entityId = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMember);
-        
+
         memberServerValidation(entityId, jwtTokenHeaderName, jwtToken, put("/members"));
     }
-    
+
     @Test
     public void create_member_with_invalid_data_application_json_test() throws Exception {
         final String jwtTokenHeaderName = getAuthHeaderName();
         final String jwtToken = doAdminLoginUtil();
-        
+
         memberServerValidation(null, jwtTokenHeaderName, jwtToken, post("/members"));
     }
-    
-    private void memberServerValidation(String entityId, 
-            String jwtTokenHeaderName, 
+
+    private void memberServerValidation(String entityId,
+            String jwtTokenHeaderName,
             String jwtToken, MockHttpServletRequestBuilder putReqBuilder) throws Exception {
         // invalid first name test: first name equals NULL
         final MemberDto memberWithInvalidFirstNameNull = new MemberDto(entityId, null,
                 "Parkhomenko", "12345", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
-        
+
         mockMvc.perform(putReqBuilder
                 .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithInvalidFirstNameNull))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(status().is(400));
-        
+
         // invalid first name test: first name equals EMPTY STRING
-        final MemberDto memberWithInvalidFirstNameEmpty = new MemberDto(entityId, "", 
+        final MemberDto memberWithInvalidFirstNameEmpty = new MemberDto(entityId, "",
                 "Parkhomenko", "12345", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
-        
+
         mockMvc.perform(putReqBuilder
                 .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithInvalidFirstNameEmpty))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(status().is(400));
-        
+
         // invalid second name test: second name equals NULL
-        final MemberDto memberWithInvalidSecondNameNull = new MemberDto(entityId, "Dima", 
+        final MemberDto memberWithInvalidSecondNameNull = new MemberDto(entityId, "Dima",
                 null, "12345", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
-        
+
         mockMvc.perform(putReqBuilder
                 .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithInvalidSecondNameNull))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(status().is(400));
-        
+
         // invalid second name test: second name equals EMPTY STRING
-        final MemberDto memberWithInvalidSecondNameEmpty = new MemberDto(entityId, "Dima", 
+        final MemberDto memberWithInvalidSecondNameEmpty = new MemberDto(entityId, "Dima",
                 "", "12345", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
-        
+
         mockMvc.perform(putReqBuilder
                 .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithInvalidSecondNameEmpty))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(status().is(400));
-        
+
         // invalid ZIP test
-        final MemberDto memberWithInvalidZip = new MemberDto(entityId, "Dima", 
+        final MemberDto memberWithInvalidZip = new MemberDto(entityId, "Dima",
                 "Parkhomenko", "I am an invalid ZIP", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
-        
+
         mockMvc.perform(putReqBuilder
                 .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithInvalidZip))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(status().is(400));
-        
+
         // invalid ZIP test: ZIP equals NULL
-        final MemberDto memberWithZipNull = new MemberDto(entityId, "Dima", 
+        final MemberDto memberWithZipNull = new MemberDto(entityId, "Dima",
                 "Parkhomenko", null, LocalDate.of(1991, Month.SEPTEMBER, 24), null);
-        
+
         mockMvc.perform(putReqBuilder
                 .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithZipNull))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(status().is(400));
-        
+
         // invalid ZIP test: ZIP equals EMPTY STRING
-        final MemberDto memberWithZipEmpty = new MemberDto(entityId, "Dima", 
+        final MemberDto memberWithZipEmpty = new MemberDto(entityId, "Dima",
                 "Parkhomenko", "", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
-        
+
         mockMvc.perform(putReqBuilder
                 .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithZipEmpty))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(status().is(400));
-        
+
         // invalid birth day test: birth day equals NULL
-        final MemberDto memberWithBirthDayNull = new MemberDto(entityId, "Dima", 
+        final MemberDto memberWithBirthDayNull = new MemberDto(entityId, "Dima",
                 "Parkhomenko", "123456", null, null);
-        
+
         mockMvc.perform(putReqBuilder
                 .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithBirthDayNull))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(status().is(400));
-        
+
         // invalid birth day test: birth day is after now date
-        final MemberDto memberWithBirthDayAfterNowDate = new MemberDto(entityId, "Dima", 
+        final MemberDto memberWithBirthDayAfterNowDate = new MemberDto(entityId, "Dima",
                 "Parkhomenko", "123456", LocalDate.now().plusDays(1), null);
-        
+
         mockMvc.perform(putReqBuilder
                 .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithBirthDayAfterNowDate))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(status().is(400));
-        
+
         // invalid birth day test: birth day is not after LocalDate.MIN from Java JDK 1.8
-        final MemberDto memberWithBirthDayNotAfterMinDate = new MemberDto(entityId, "Dima", 
+        final MemberDto memberWithBirthDayNotAfterMinDate = new MemberDto(entityId, "Dima",
                 "Parkhomenko", "123456", LocalDate.MIN, null);
-        
+
         mockMvc.perform(putReqBuilder
                 .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithBirthDayNotAfterMinDate))
@@ -522,7 +559,7 @@ public class IntegrationTest {
                 .andDo(print())
                 .andExpect(status().is(400));
     }
-    
+
     private String doAdminLoginUtil() throws Exception {
         final Map<String, String> payload = buildLoginData();
 
@@ -550,12 +587,7 @@ public class IntegrationTest {
     }
 
     private Map<String, String> buildLoginData() {
-        HashMap<String, String> data = new HashMap<String, String>() {
-            {
-                put(Constants.USERNAME_LOGIN_FORM_PARAMETER_KEY, "Dmytro");
-                put(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY, "qwerty");
-            }
-        };
+        HashMap<String, String> data = buildLoginData("Dmytro", "qwerty");
         Map<String, String> payload = Collections.unmodifiableMap(data);
         return payload;
     }
@@ -571,11 +603,11 @@ public class IntegrationTest {
         Assert.assertEquals(originMember.postalCode, fetchedMember.postalCode);
         Assert.assertArrayEquals(originMember.image, fetchedMember.image);
     }
-    
+
     private String getTokenFromMvcResult(MvcResult mvcResult) {
         return mvcResult.getResponse().getHeader(getAuthHeaderName());
     }
-    
+
     private String doCreateMamberOnServerTest(String jwtTokenHeaderName,
             String jwtToken,
             MemberDto originMember) throws IOException, Exception {

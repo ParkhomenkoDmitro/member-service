@@ -44,6 +44,5 @@ public class AdminDaoImpl implements AdminDao {
         Admin admin = adminRepository.findByLogin(login);
         admin.token = jwtToken;
         adminRepository.save(admin);
-        System.out.println("!!!!!!!!!!!!!!!!!!! save token = " + jwtToken);
     }
 }
