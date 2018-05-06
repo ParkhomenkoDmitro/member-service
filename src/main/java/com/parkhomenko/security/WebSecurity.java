@@ -29,26 +29,25 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  *
  * @author dmytro
  */
-
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
-    
+
     private static final String LOGIN_URL = "/admins/login";
     private static final String SIGN_UP_URL = "/admins/sign-up";
 
     @Autowired
     private Environment env;
-    
+
     private final UserDetailsService userDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final AuthenticationFailureHandler authenticationFailureHandler;
     private final AdminDao adminDao;
-    
-    public WebSecurity(@Qualifier("AdminDetailsServiceImpl") UserDetailsService userDetailsService, 
+
+    public WebSecurity(@Qualifier("AdminDetailsServiceImpl") UserDetailsService userDetailsService,
             BCryptPasswordEncoder bCryptPasswordEncoder,
             AuthenticationFailureHandler authenticationFailureHandler,
-            RestAuthenticationEntryPoint restAuthenticationEntryPoint, 
+            RestAuthenticationEntryPoint restAuthenticationEntryPoint,
             AdminDao adminDao) {
         this.userDetailsService = userDetailsService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
@@ -56,22 +55,32 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
         this.adminDao = adminDao;
     }
-    
-     @Override
+
+    @Override
+    public void configure(org.springframework.security.config.annotation.web.builders.WebSecurity web) throws Exception {
+        web.ignoring().antMatchers("/v2/api-docs/**");
+        web.ignoring().antMatchers("/swagger.json");
+        web.ignoring().antMatchers("/swagger-ui.html");
+        web.ignoring().antMatchers("/webjars/**");
+        web.ignoring().antMatchers("/swagger-resources/**");
+        web.ignoring().antMatchers("/swagger-ui.html/**");
+    }
+
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
-        final JWTAuthenticationFilter jwtAuthenticationFilter = 
-                new JWTAuthenticationFilter(authenticationManager(), 
+        final JWTAuthenticationFilter jwtAuthenticationFilter
+                = new JWTAuthenticationFilter(authenticationManager(),
                         env.getProperty(Constants.JWT_TOKEN_PREFIX_KEY),
                         env.getProperty(Constants.JWT_TOKEN_HEADER_NAME_KEY),
-                        env.getProperty(Constants.JWT_TOKEN_SECRET_KEY), 
+                        env.getProperty(Constants.JWT_TOKEN_SECRET_KEY),
                         adminDao
                 );
-        
+
         jwtAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
         jwtAuthenticationFilter.setUsernameParameter(Constants.USERNAME_LOGIN_FORM_PARAMETER_KEY);
         jwtAuthenticationFilter
                 .setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(LOGIN_URL, "POST"));
-        
+
         http.cors()
                 .and()
                 .csrf().disable()
@@ -86,16 +95,16 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .addFilter(new JWTAuthorizationFilter(authenticationManager(),
                         env.getProperty(Constants.JWT_TOKEN_PREFIX_KEY),
                         env.getProperty(Constants.JWT_TOKEN_HEADER_NAME_KEY),
-                        env.getProperty(Constants.JWT_TOKEN_SECRET_KEY), 
+                        env.getProperty(Constants.JWT_TOKEN_SECRET_KEY),
                         adminDao))
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
-    
+
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
     }
-    
+
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -38,7 +38,8 @@ public class MemberDaoImpl implements MemberDao {
 
     @Override
     public List<MemberDto> getAll() {
-        return memberRepository.findAll(Sort.by(Sort.Direction.ASC, "id")).stream().map(item
+        return memberRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
+                .stream().map(item
                 -> new MemberDto(item.id, item.firstName, item.lastName,
                         item.postalCode, item.birthDate, item.image))
                 .collect(Collectors.toList());
