@@ -26,7 +26,6 @@ public class UnitJwtTest {
             final String token = Jwts.builder()
                 .setId(String.valueOf(System.nanoTime()))
                 .setSubject("Dima")
-                .setExpiration(new Date(System.currentTimeMillis() + 864000000))
                 .signWith(SignatureAlgorithm.HS512, "SecretKeyToGenJWTs".getBytes())
                 .compact();
             

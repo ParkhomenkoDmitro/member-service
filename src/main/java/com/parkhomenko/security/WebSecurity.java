@@ -64,7 +64,6 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                         env.getProperty(Constants.JWT_TOKEN_PREFIX_KEY),
                         env.getProperty(Constants.JWT_TOKEN_HEADER_NAME_KEY),
                         env.getProperty(Constants.JWT_TOKEN_SECRET_KEY), 
-                        env.getProperty(Constants.JWT_TOKEN_EXPIRATIO_TIME_KEY, Long.class),
                         adminDao
                 );
         

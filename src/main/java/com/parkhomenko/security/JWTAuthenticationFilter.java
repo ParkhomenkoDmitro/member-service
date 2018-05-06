@@ -34,18 +34,16 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final String TOKEN_PREFIX;
     private final String HEADER_STRING;
     private final String SECRET;
-    private final long EXPIRATION_TIME;
 
     private final AdminDao adminDao;
 
     public JWTAuthenticationFilter(AuthenticationManager authenticationManager,
             String tokenPrefix, String headerString, String secret,
-            long expirationTime, AdminDao adminDao) {
+            AdminDao adminDao) {
         this.authenticationManager = authenticationManager;
         TOKEN_PREFIX = tokenPrefix;
         HEADER_STRING = headerString;
         SECRET = secret;
-        EXPIRATION_TIME = expirationTime;
         this.adminDao = adminDao;
     }
 
@@ -92,7 +90,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         final String token = Jwts.builder()
                 .setId(String.valueOf(System.nanoTime()))
                 .setSubject(login)
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, SECRET.getBytes())
                 .compact();
 
