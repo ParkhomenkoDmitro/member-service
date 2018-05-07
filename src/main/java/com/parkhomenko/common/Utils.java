@@ -5,8 +5,10 @@
  */
 package com.parkhomenko.common;
 
-import java.util.HashMap;
-import java.util.Map;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -19,11 +21,38 @@ public class Utils {
         return ResponseEntity.ok(new SuccessCreateDto(memberId));
     }
     
+    @ApiModel(description = "Success creation a new member")
+    @ToString
+    @EqualsAndHashCode
     public static class SuccessCreateDto {
+        @ApiModelProperty(value = "ID of a created member", readOnly = true)
         public final String id;
+
+        public SuccessCreateDto() {
+            id ="";
+        }
 
         public SuccessCreateDto(String id) {
             this.id = id;
         }
+    }
+    
+    @ApiModel(description = "Login data")
+    @ToString
+    @EqualsAndHashCode
+    public static class LoginData {
+        @ApiModelProperty(value = "Login for admin", readOnly = true)
+        public final String login;
+        @ApiModelProperty(value = "Password for admin", readOnly = true)
+        public final String password;
+
+        public LoginData() {
+            login = password = "";
+        }
+
+        public LoginData(String login, String password) {
+            this.login = login;
+            this.password = password;
+        }        
     }
 }

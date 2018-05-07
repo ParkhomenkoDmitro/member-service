@@ -242,19 +242,24 @@ public class IntegrationTest {
         mockMvc.perform(post("/admins/sign-up")
                 .content(objectMapper.writeValueAsString(payload))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().is(200));
+                .andExpect(status().is(200))
+                .andDo(print());
 
         MvcResult mvcResultAfterFirstLogin = mockMvc.perform(post("/admins/login")
                 .content(objectMapper.writeValueAsString(payload))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().is(200)).andReturn();
+                .andExpect(status().is(200))
+                .andDo(print())
+                .andReturn();
 
         final String jwtTokenAfterFirstLogin = getTokenFromMvcResult(mvcResultAfterFirstLogin);
 
         MvcResult mvcResultAfterSecondtLogin = mockMvc.perform(post("/admins/login")
                 .content(objectMapper.writeValueAsString(payload))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().is(200)).andReturn();
+                .andExpect(status().is(200))
+                .andDo(print())
+                .andReturn();
 
         final String jwtTokenAfterSecondLogin = getTokenFromMvcResult(mvcResultAfterSecondtLogin);
 

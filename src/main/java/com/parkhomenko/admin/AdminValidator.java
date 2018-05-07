@@ -5,9 +5,7 @@
  */
 package com.parkhomenko.admin;
 
-import com.parkhomenko.common.Constants;
-import java.util.Map;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import com.parkhomenko.common.Utils.LoginData;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -24,9 +22,9 @@ public class AdminValidator {
         this.adminDao = adminDao;
     }
 
-    public boolean singUpCheck(Map<String, String> loginData) {
-        final String newLogin = loginData.get(Constants.USERNAME_LOGIN_FORM_PARAMETER_KEY);
-        final String pwd = loginData.get(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY);
+    public boolean singUpCheck(LoginData loginData) {
+        final String newLogin = loginData.login;
+        final String pwd = loginData.password;
         
         if(StringUtils.isEmpty(newLogin) || StringUtils.isEmpty(pwd)) {
             return false;

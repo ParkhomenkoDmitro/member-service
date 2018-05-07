@@ -1,13 +1,16 @@
 package com.parkhomenko.admin;
 
 import com.parkhomenko.common.Constants;
+import com.parkhomenko.common.Utils.LoginData;
 import io.swagger.annotations.Api;
-import java.util.Map;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/admins")
-@Api(value="Member Server", produces = "application/json, application/xml")
+@Api(value = "Member Server", produces = "application/json, application/xml", 
+        consumes = "application/json, application/xml")
 public class AdminController {
     
     @Autowired
@@ -32,6 +36,12 @@ public class AdminController {
     @Autowired
     private Environment env;
     
+    @ApiOperation(value = "Logout admin", notes = "Logout admin, if invalid jwt token was sent then nothing happen",
+            consumes = "application/json, application/xml", produces = "application/json, application/xml")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successfully logout"),
+        @ApiResponse(code = 401, message = "You are not authorized to view the resource")
+    })
     @PostMapping("/logout")
     public void logout(HttpServletRequest req) {
         String jwtTokenHeaderName = env.getProperty(Constants.JWT_TOKEN_HEADER_NAME_KEY); 
@@ -39,16 +49,24 @@ public class AdminController {
         adminService.logout(jwtToken);
     }
     
+    @ApiOperation(value = "Sign up admin", notes = "Register admin by password", response = Void.class,
+            consumes = "application/json, application/xml", produces = "application/json, application/xml")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successfully registered"),
+        @ApiResponse(code = 400, message = "Data for registration of a new admin are not valid"),
+        @ApiResponse(code = 401, message = "You are not authorized to view the resource")
+    })
     @PostMapping("/sign-up")
-    public ResponseEntity signUpByPassword(@RequestBody Map<String, String> loginData) {
+    public ResponseEntity<Void> signUpByPassword(
+            @ApiParam(required = true, name = "loginData", value = "Login and password for registration",
+                    example = "http:8080/app/members?ids=1&ids=2&ids=3")
+            @RequestBody LoginData loginData) {
+        
         if(adminValidator.singUpCheck(loginData) == false) {
             return ResponseEntity.badRequest().build();
         }
-
-        final String newLogin = loginData.get(Constants.USERNAME_LOGIN_FORM_PARAMETER_KEY);
-        final String pwd = loginData.get(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY);
         
-        adminService.signUpByPassword(new AdminDto(newLogin, pwd));
+        adminService.signUpByPassword(new AdminDto(loginData.login, loginData.password));
         
         return ResponseEntity.ok().build();
     }

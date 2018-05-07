@@ -33,7 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(value = "/members")
-@Api(value = "Member Server", produces = "application/json, application/xml")
+@Api(value = "Member Server", produces = "application/json, application/xml", 
+        consumes = "application/json, application/xml")
 public class MemberController {
 
     @Autowired
@@ -42,7 +43,8 @@ public class MemberController {
     @Autowired
     private MemberService memberService;
 
-    @ApiOperation(value = "Get list", notes = "View a list of available members", response = MemberDto[].class)
+    @ApiOperation(value = "Get list", notes = "View a list of available members", response = MemberDto[].class, 
+            consumes = "application/json, application/xml", produces = "application/json, application/xml")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Successfully retrieved", response = MemberDto[].class),
         @ApiResponse(code = 401, message = "You are not authorized to view the resource")
@@ -52,7 +54,8 @@ public class MemberController {
         return memberService.getAll();
     }
 
-    @ApiOperation(value = "Get one", notes = "View a one member by id", response = MemberDto.class)
+    @ApiOperation(value = "Get one", notes = "View a one member by id", response = MemberDto.class,
+            consumes = "application/json, application/xml", produces = "application/json, application/xml")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Successfully retrieved"),
         @ApiResponse(code = 400, message = "Member not found"),
@@ -71,7 +74,8 @@ public class MemberController {
         return ResponseEntity.ok(foundMember);
     }
 
-    @ApiOperation(value = "Update one", notes = "Update a one member by id", response = Void.class)
+    @ApiOperation(value = "Update one", notes = "Update a one member by id", response = Void.class,
+            consumes = "application/json, application/xml", produces = "application/json, application/xml")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Successfully updated"),
         @ApiResponse(code = 400, message = "Data for update member are not valid"),
@@ -90,7 +94,8 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
-    @ApiOperation(value = "Crete one", notes = "Create a new member", response = SuccessCreateDto.class)
+    @ApiOperation(value = "Crete one", notes = "Create a new member", response = SuccessCreateDto.class,
+            consumes = "application/json, application/xml", produces = "application/json, application/xml")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Successfully created"),
         @ApiResponse(code = 400, message = "Data for a new member are not valid"),
@@ -108,7 +113,8 @@ public class MemberController {
         return Utils.buildCreateResponse(memberId);
     }
 
-    @ApiOperation(value = "Delete many", notes = "Delete many members by id")
+    @ApiOperation(value = "Delete many", notes = "Delete many members by id",
+            consumes = "application/json, application/xml", produces = "application/json, application/xml")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Successfully deleted"),
         @ApiResponse(code = 401, message = "You are not authorized to view the resource")
