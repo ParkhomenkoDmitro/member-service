@@ -30,17 +30,16 @@ public class MemberDto {
     public final String postalCode;
     @ApiModelProperty(value = "The birthday of the given member", readOnly = true)
     public final LocalDate birthDate;
-    @ApiModelProperty(value = "The image of the given member", readOnly = true)
-    public final byte[] image;
+    @ApiModelProperty(value = "The image of the given member in Base64 format", readOnly = true)
+    public final String image;
 
     public MemberDto() {
-        id = firstName = lastName = postalCode = "";
+        id = firstName = lastName = postalCode = image = "";
         birthDate = LocalDate.MIN;
-        image = new byte[0];
     }
 
     public MemberDto(String firstName, String lastName, String postalCode, 
-            LocalDate birthDate, byte[] image) {
+            LocalDate birthDate, String image) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.postalCode = postalCode;
@@ -54,7 +53,7 @@ public class MemberDto {
             String lastName, 
             String postalCode, 
             LocalDate birthDate, 
-            byte[] image) {
+            String image) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;

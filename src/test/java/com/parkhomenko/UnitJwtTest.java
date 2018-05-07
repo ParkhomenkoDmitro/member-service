@@ -7,7 +7,6 @@ package com.parkhomenko;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import java.util.Date;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -37,5 +36,5 @@ public class UnitJwtTest {
         }
         
         Assert.assertEquals(0, count);
-    }    
+    }
 }

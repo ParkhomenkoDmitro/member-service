@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 @Component
 public class MemberValidator {
 
+    private static final int MAX_IMAGE_SIZE_MB = 1;
     private final MemberDao memberDao;
 
     public MemberValidator(MemberDao memberDao) {
@@ -53,7 +54,14 @@ public class MemberValidator {
             return false;
         }
 
-        //TODO
+        if(StringUtils.isEmpty(memberDto.image) == false) {
+            int size = memberDto.image.getBytes().length;
+            
+            if((size / 1024 / 1024) > MAX_IMAGE_SIZE_MB) {
+                return false;
+            }
+        }
+        
         return true;
     }
     

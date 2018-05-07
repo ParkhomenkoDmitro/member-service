@@ -6,12 +6,15 @@
 package com.parkhomenko;
 
 import com.google.common.base.Predicates;
+import static com.google.common.collect.Lists.newArrayList;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.ParameterBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
@@ -41,7 +44,15 @@ public class SwaggerConfig {
                 .apis(Predicates.not(RequestHandlerSelectors.basePackage("org.springframework.data.rest.webmvc")))
                 .paths(PathSelectors.any())
                 .build()
-                .apiInfo(metaData());
+                .apiInfo(metaData()).globalOperationParameters(
+                newArrayList(new ParameterBuilder()
+                        .name("Authorization")
+                        .description("Description of header")
+                        .modelRef(new ModelRef("string"))
+                        .parameterType("header")
+                        .required(false)
+                        .build())
+        );
     }
 
     @Primary

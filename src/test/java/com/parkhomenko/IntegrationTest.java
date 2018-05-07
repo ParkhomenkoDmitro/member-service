@@ -6,9 +6,11 @@ import com.parkhomenko.member.Member;
 import com.parkhomenko.admin.Admin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -171,7 +173,7 @@ public class IntegrationTest {
                 .content(objectMapper.writeValueAsString(payload))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().is(200));
-        
+
         mockMvc.perform(post("/admins/sign-up")
                 .content(objectMapper.writeValueAsString(payload))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
@@ -280,7 +282,7 @@ public class IntegrationTest {
     public void success_login_for_admin_with_create_member_application_json_test() throws Exception {
         final String jwtTokenHeaderName = getAuthHeaderName();
         final String jwtToken = doAdminLoginUtil();
-        final MemberDto originMember = buildTestMember();
+        final MemberDto originMember = buildValidMember();
 
         String entityId = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMember);
 
@@ -298,7 +300,7 @@ public class IntegrationTest {
     public void success_login_for_admin_with_put_member_application_json_test() throws Exception {
         final String jwtTokenHeaderName = getAuthHeaderName();
         final String jwtToken = doAdminLoginUtil();
-        final MemberDto originMember = buildTestMember();
+        final MemberDto originMember = buildValidMember();
 
         String entityId = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMember);
 
@@ -340,9 +342,9 @@ public class IntegrationTest {
     public void success_login_for_admin_with_get_all_members_application_json_test() throws Exception {
         final String jwtTokenHeaderName = getAuthHeaderName();
         final String jwtToken = doAdminLoginUtil();
-        final MemberDto originMemberOne = buildTestMember();
-        final MemberDto originMemberTwo = buildTestMember();
-        final MemberDto originMemberThree = buildTestMember();
+        final MemberDto originMemberOne = buildValidMember();
+        final MemberDto originMemberTwo = buildValidMember();
+        final MemberDto originMemberThree = buildValidMember();
 
         final String entityIdOne = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMemberOne);
         final String entityIdTwo = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMemberTwo);
@@ -373,9 +375,9 @@ public class IntegrationTest {
     public void success_login_for_admin_with_get_all_members_application_xml_test() throws Exception {
         final String jwtTokenHeaderName = getAuthHeaderName();
         final String jwtToken = doAdminLoginUtil();
-        final MemberDto originMemberOne = buildTestMember();
-        final MemberDto originMemberTwo = buildTestMember();
-        final MemberDto originMemberThree = buildTestMember();
+        final MemberDto originMemberOne = buildValidMember();
+        final MemberDto originMemberTwo = buildValidMember();
+        final MemberDto originMemberThree = buildValidMember();
 
         final String entityIdOne = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMemberOne);
         final String entityIdTwo = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMemberTwo);
@@ -387,14 +389,14 @@ public class IntegrationTest {
                 .andDo(print())
                 .andExpect(status().is(200)).andReturn();
 
-        String actual =
-                "<List>" +
-                    "<item><id>" + entityIdOne + "</id><firstName>Dima</firstName><lastName>Parkhomenko</lastName><postalCode>12345</postalCode><birthDate>1991-09-24</birthDate><image/></item>" +
-                    "<item><id>" + entityIdTwo + "</id><firstName>Dima</firstName><lastName>Parkhomenko</lastName><postalCode>12345</postalCode><birthDate>1991-09-24</birthDate><image/></item>" +
-                    "<item><id>" + entityIdThree + "</id><firstName>Dima</firstName><lastName>Parkhomenko</lastName><postalCode>12345</postalCode><birthDate>1991-09-24</birthDate><image/></item>" +
-                "</List>";
-        
-        Assert.assertEquals(mvcResult.getResponse().getContentAsString(), actual);
+        String expected
+                = "<List>"
+                + "<item><id>" + entityIdOne + "</id><firstName>Dima</firstName><lastName>Parkhomenko</lastName><postalCode>12345</postalCode><birthDate>1991-09-24</birthDate><image></image></item>"
+                + "<item><id>" + entityIdTwo + "</id><firstName>Dima</firstName><lastName>Parkhomenko</lastName><postalCode>12345</postalCode><birthDate>1991-09-24</birthDate><image></image></item>"
+                + "<item><id>" + entityIdThree + "</id><firstName>Dima</firstName><lastName>Parkhomenko</lastName><postalCode>12345</postalCode><birthDate>1991-09-24</birthDate><image></image></item>"
+                + "</List>";
+
+        Assert.assertEquals(expected, mvcResult.getResponse().getContentAsString());
 
     }
 
@@ -415,9 +417,9 @@ public class IntegrationTest {
     public void delete_members_application_json_test() throws Exception {
         final String jwtTokenHeaderName = getAuthHeaderName();
         final String jwtToken = doAdminLoginUtil();
-        final MemberDto originMemberOne = buildTestMember();
-        final MemberDto originMemberTwo = buildTestMember();
-        final MemberDto originMemberThree = buildTestMember();
+        final MemberDto originMemberOne = buildValidMember();
+        final MemberDto originMemberTwo = buildValidMember();
+        final MemberDto originMemberThree = buildValidMember();
 
         final String entityIdOne = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMemberOne);
         final String entityIdTwo = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMemberTwo);
@@ -469,7 +471,7 @@ public class IntegrationTest {
                 .andDo(print())
                 .andExpect(status().is(400));
 
-        final MemberDto originMember = buildTestMember();
+        final MemberDto originMember = buildValidMember();
         final String entityId = doCreateMamberOnServerTest(jwtTokenHeaderName, jwtToken, originMember);
 
         memberServerValidation(entityId, jwtTokenHeaderName, jwtToken, put("/members"));
@@ -595,6 +597,18 @@ public class IntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(status().is(400));
+        
+        // invalid image size: more then 1 Mb
+        String bigImageBase64 = getTestImageBase64("space-x.jpg");
+        final MemberDto memberWithBigImage = new MemberDto(entityId, "Dima",
+                "Parkhomenko", "123456", LocalDate.of(1991, Month.SEPTEMBER, 24), bigImageBase64);
+
+        mockMvc.perform(putReqBuilder
+                .header(jwtTokenHeaderName, jwtToken)
+                .content(objectMapper.writeValueAsString(memberWithBigImage))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(print())
+                .andExpect(status().is(400));
     }
 
     private String doAdminLoginUtil() throws Exception {
@@ -614,12 +628,23 @@ public class IntegrationTest {
         return jwtToken;
     }
 
-    private MemberDto buildTestMember() {
+    private MemberDto buildValidMember() throws IOException {
         MemberDto originMember = new MemberDto("Dima",
                 "Parkhomenko",
                 "12345",
                 LocalDate.of(1991, Month.SEPTEMBER, 24),
-                null);
+                "");
+        return originMember;
+    }
+
+    private MemberDto buildValidMemberWithImage() throws IOException {
+        String testImageBase64 = getTestImageBase64("gta-vs.jpg");
+
+        MemberDto originMember = new MemberDto("Dima",
+                "Parkhomenko",
+                "12345",
+                LocalDate.of(1991, Month.SEPTEMBER, 24),
+                testImageBase64);
         return originMember;
     }
 
@@ -638,7 +663,7 @@ public class IntegrationTest {
         Assert.assertEquals(originMember.lastName, fetchedMember.lastName);
         Assert.assertEquals(originMember.birthDate, fetchedMember.birthDate);
         Assert.assertEquals(originMember.postalCode, fetchedMember.postalCode);
-        Assert.assertArrayEquals(originMember.image, fetchedMember.image);
+        Assert.assertEquals(originMember.image, fetchedMember.image);
     }
 
     private String getTokenFromMvcResult(MvcResult mvcResult) {
@@ -656,5 +681,15 @@ public class IntegrationTest {
                 .andExpect(status().is(200)).andReturn();
         String entityId = TestsUtil.getEntityId(mvcResultPost, objectMapper);
         return entityId;
+    }
+    
+    private String getTestImageBase64(String imageName) throws IOException {
+        InputStream image = getClass().getClassLoader().getResourceAsStream(imageName);
+        
+        byte[] targetArray = new byte[image.available()];
+        image.read(targetArray);
+        
+        String base64Image = Base64.getEncoder().encodeToString(targetArray);
+        return base64Image;
     }
 }

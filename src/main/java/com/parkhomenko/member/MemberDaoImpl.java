@@ -31,7 +31,9 @@ public class MemberDaoImpl implements MemberDao {
     @Override
     public String create(MemberDto memberDto) {
         Member newMember = new Member(memberDto.firstName, memberDto.lastName,
-                memberDto.postalCode, memberDto.birthDate, memberDto.image);
+                memberDto.postalCode, memberDto.birthDate,
+                memberDto.image != null ? memberDto.image.getBytes() : null);
+
         Member savedMember = memberRepository.save(newMember);
         return savedMember.id;
     }
@@ -41,7 +43,7 @@ public class MemberDaoImpl implements MemberDao {
         return memberRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
                 .stream().map(item
                 -> new MemberDto(item.id, item.firstName, item.lastName,
-                        item.postalCode, item.birthDate, item.image))
+                        item.postalCode, item.birthDate, item.image != null ? new String(item.image) : ""))
                 .collect(Collectors.toList());
     }
 
@@ -50,9 +52,9 @@ public class MemberDaoImpl implements MemberDao {
         Optional<Member> optional = memberRepository.findById(id);
 
         if (optional.isPresent()) {
-            Member member = optional.get();
-            return new MemberDto(member.id, member.firstName, member.lastName,
-                    member.postalCode, member.birthDate, member.image);
+            Member item = optional.get();
+            return new MemberDto(item.id, item.firstName, item.lastName,
+                    item.postalCode, item.birthDate, item.image != null ? new String(item.image) : "");
         } else {
             return emptyMember;
         }
@@ -69,7 +71,7 @@ public class MemberDaoImpl implements MemberDao {
             member.firstName = memberDto.firstName;
             member.lastName = memberDto.lastName;
             member.postalCode = memberDto.postalCode;
-            member.image = memberDto.image;
+            member.image = memberDto.image != null ? memberDto.image.getBytes() : null;
             
             memberRepository.save(member);
         }
