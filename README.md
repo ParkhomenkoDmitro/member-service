@@ -1,4 +1,4 @@
-# member-service
+# Member Service Application
 ## Epic/Story As a technical lead I want to have a “Member” service so that I can easily:
 * Create a new member
 * Read an existing member
