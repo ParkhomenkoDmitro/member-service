@@ -492,8 +492,10 @@ public class IntegrationTest {
         final MemberDto memberWithInvalidFirstNameNull = new MemberDto(entityId, null,
                 "Parkhomenko", "12345", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
 
+        putReqBuilder
+                .header(jwtTokenHeaderName, jwtToken); // add header only once for all requests below
+        
         mockMvc.perform(putReqBuilder
-                .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithInvalidFirstNameNull))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -504,7 +506,6 @@ public class IntegrationTest {
                 "Parkhomenko", "12345", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
 
         mockMvc.perform(putReqBuilder
-                .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithInvalidFirstNameEmpty))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -515,7 +516,6 @@ public class IntegrationTest {
                 null, "12345", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
 
         mockMvc.perform(putReqBuilder
-                .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithInvalidSecondNameNull))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -526,7 +526,6 @@ public class IntegrationTest {
                 "", "12345", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
 
         mockMvc.perform(putReqBuilder
-                .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithInvalidSecondNameEmpty))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -537,7 +536,6 @@ public class IntegrationTest {
                 "Parkhomenko", "I am an invalid ZIP", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
 
         mockMvc.perform(putReqBuilder
-                .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithInvalidZip))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -548,7 +546,6 @@ public class IntegrationTest {
                 "Parkhomenko", null, LocalDate.of(1991, Month.SEPTEMBER, 24), null);
 
         mockMvc.perform(putReqBuilder
-                .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithZipNull))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -559,7 +556,6 @@ public class IntegrationTest {
                 "Parkhomenko", "", LocalDate.of(1991, Month.SEPTEMBER, 24), null);
 
         mockMvc.perform(putReqBuilder
-                .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithZipEmpty))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -570,7 +566,6 @@ public class IntegrationTest {
                 "Parkhomenko", "123456", null, null);
 
         mockMvc.perform(putReqBuilder
-                .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithBirthDayNull))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -581,7 +576,6 @@ public class IntegrationTest {
                 "Parkhomenko", "123456", LocalDate.now().plusDays(1), null);
 
         mockMvc.perform(putReqBuilder
-                .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithBirthDayAfterNowDate))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -592,7 +586,6 @@ public class IntegrationTest {
                 "Parkhomenko", "123456", LocalDate.MIN, null);
 
         mockMvc.perform(putReqBuilder
-                .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithBirthDayNotAfterMinDate))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -604,10 +597,8 @@ public class IntegrationTest {
                 "Parkhomenko", "123456", LocalDate.of(1991, Month.SEPTEMBER, 24), bigImageBase64);
 
         mockMvc.perform(putReqBuilder
-                .header(jwtTokenHeaderName, jwtToken)
                 .content(objectMapper.writeValueAsString(memberWithBigImage))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andDo(print())
                 .andExpect(status().is(400));
     }
 

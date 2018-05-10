@@ -97,7 +97,7 @@
                 <groupId>com.spotify</groupId>
                 <artifactId>dockerfile-maven-plugin</artifactId>
                 <version>1.3.6</version>
-                <executions>
+<!--                <executions>
                     <execution>
                         <id>default</id>
                         <phase>install</phase>
@@ -106,7 +106,7 @@
                             <goal>push</goal>
                         </goals>
                     </execution>
-                </executions>
+                </executions>-->
                 <configuration>
                     <repository>${docker.image.prefix}/${project.artifactId}</repository>
                     <buildArgs>
