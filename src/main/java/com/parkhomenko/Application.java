@@ -3,6 +3,7 @@ package com.parkhomenko;
 import com.parkhomenko.admin.AdminDto;
 import com.parkhomenko.admin.AdminDao;
 import com.mongodb.WriteConcern;
+import com.parkhomenko.admin.AdminService;
 import com.parkhomenko.member.MemberDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -16,7 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class Application implements CommandLineRunner {
 
     @Autowired
-    private AdminDao adminDao;
+    private AdminService adminService;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -29,7 +30,7 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        adminDao.signUpByPassword(new AdminDto("hachiko", "hachiko"));
+        adminService.signUpByPassword(new AdminDto("hachiko", "hachiko"));
     }
 
     @Bean
