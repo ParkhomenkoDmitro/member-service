@@ -23,8 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/admins")
-@Api(value = "Member Server", produces = "application/json, application/xml", 
-        consumes = "application/json, application/xml")
+@Api(
+        value = "Member Server", 
+        produces = "application/json, application/xml", 
+        consumes = "application/json, application/xml", 
+        tags = "Admin resourse", description = "Admin resourse API")
 public class AdminController {
     
     @Autowired
@@ -35,6 +38,20 @@ public class AdminController {
     
     @Autowired
     private Environment env;
+    
+
+    @ApiOperation(value = "Authentication admin", notes = "Here you can log in as admin",
+            consumes = "application/json, application/xml", produces = "application/json, application/xml")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successfully login")      
+    })
+    @PostMapping("/login")
+    public void fakeLoginForSwaggerDocumentation(@ApiParam(required = true, 
+            name = "loginData", 
+            value = "Login and password for authentication")
+            @RequestBody LoginData loginData) {
+        throw new IllegalStateException("It's implemented by Spring Security filter");
+    }
     
     @ApiOperation(value = "Logout admin", notes = "Logout admin, if invalid jwt token was sent then nothing happen",
             consumes = "application/json, application/xml", produces = "application/json, application/xml")

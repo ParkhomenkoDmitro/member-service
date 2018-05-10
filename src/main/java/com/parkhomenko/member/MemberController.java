@@ -33,8 +33,11 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(value = "/members")
-@Api(value = "Member Server", produces = "application/json, application/xml", 
-        consumes = "application/json, application/xml")
+@Api(
+        value = "Member Server", 
+        produces = "application/json, application/xml", 
+        consumes = "application/json, application/xml",
+        tags = "Member resourse", description = "Member resourse API")
 public class MemberController {
 
     @Autowired
