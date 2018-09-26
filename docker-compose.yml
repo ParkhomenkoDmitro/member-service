@@ -1,0 +1,17 @@
+version: '3'
+services:
+  web:
+    build: .
+    command: mvn clean spring-boot:run
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+  db:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
