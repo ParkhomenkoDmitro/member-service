@@ -1,17 +1,27 @@
-version: '3'
+version: '3.2'
+
 services:
   web:
+    image: dimadockerid/member-service:part2
     build: .
-    command: mvn clean spring-boot:run
     ports:
       - 8080:8080
+    links:
+      - db
     depends_on:
       - db
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_NAME=test
+      - DATABASE_PORT=27017
   db:
-    image: mongo:latest
+    image: mongo
     ports:
       - 27017:27017
+  mongo-express:
+    image: mongo-express
     restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
+    ports:
+     - 8081:8081
+    links:
+     - db:mongo
